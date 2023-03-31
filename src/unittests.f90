@@ -175,7 +175,7 @@ subroutine allocate_mesh(pb)
              pb%dc(n), pb%coh(n), pb%v_pl(n) )
 
   ! Allocate RSF parameters
-  allocate ( pb%a(n), pb%b(n), pb%v1(n), pb%v2(n), pb%mu_star(n))
+  allocate ( pb%a(n), pb%b(n), pb%v1(n), pb%v2(n), pb%mu_star(n), pb%N_con(n), pb%a_th(n), pb%Tw(n), pb%tau_c(n), pb%fw(n))
 
   ! Allocate CNS parameters
   ! allocate( pb%cns_params%a_tilde(n), pb%cns_params%mu_tilde_star(n), &

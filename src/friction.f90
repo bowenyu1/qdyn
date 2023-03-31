@@ -38,6 +38,9 @@ subroutine set_theta_star(pb)
   case (3) ! SEISMIC: the CNS friction law does not use theta_star
     pb%theta_star = 1
 
+  case (4) ! rsf+fh law (modified by yu)
+    pb%theta_star = pb%dc/pb%v_star
+
 ! new friction law:
 !  case(xxx)
 !    implement here your definition of theta_star (could be none)
@@ -71,6 +74,9 @@ function friction_mu(v,theta,pb) result(mu)
     write (6,*) "friction.f90::friction_mu is deprecated for the CNS model"
     stop
 
+  case (4) ! fh+rsf law (modified by yu)
+    mu = pb%a*asinh( v/(2*pb%v_star)*exp( (pb%mu_star + pb%b*log(theta))/pb%a ) )
+
 ! new friction law:
 !  case(xxx)
 !    implement here your friction coefficient: mu = f(v,theta)
@@ -90,7 +96,7 @@ subroutine dtheta_dt(v,tau,sigma,theta,theta2,dth_dt,dth2_dt,pb)
   type(problem_type), intent(in) :: pb
   double precision, dimension(pb%mesh%nn), intent(in) :: v, tau, sigma
   double precision, dimension(pb%mesh%nn), intent(in) :: theta, theta2
-  double precision, dimension(pb%mesh%nn) :: dth_dt, dth2_dt, omega
+  double precision, dimension(pb%mesh%nn) :: dth_dt, dth2_dt, omega, theta_ssv, Vw, mu_ssv
 
   ! SEISMIC: If the CNS model is selected
   if (pb%i_rns_law == 3) then
@@ -99,6 +105,12 @@ subroutine dtheta_dt(v,tau,sigma,theta,theta2,dth_dt,dth2_dt,pb)
   else
 
     omega = v * theta / pb%dc
+    
+    !Parameters for flash heating model
+    Vw = pb%N_con * 3.14 * pb%a_th * ( pb%tp%rhoc * (pb%Tw - pb%T)/pb%tau_c ) ** 2
+    mu_ssv = ( pb%a * asinh( v/(2*pb%v_star) * exp((pb%mu_star + pb%b*log(pb%v_star/v))/pb%a) ) - pb%fw )/(1 + (v - Vw)) + pb%fw    
+    theta_ssv = exp( (pb%a * log(2*pb%v_star*sinh(mu_ssv/pb%a)/v)-pb%mu_star)/pb%b )
+
     select case (pb%itheta_law)
 
     case(0) ! "aging" in the no-healing approximation
@@ -109,6 +121,16 @@ subroutine dtheta_dt(v,tau,sigma,theta,theta2,dth_dt,dth2_dt,pb)
 
     case(2) ! "slip" law
       dth_dt = -omega*log(omega)
+
+    case(3) ! For filling the blank (modified by yu)
+      dth_dt = -omega*log(omega)
+
+    case(4) ! rsf+fh law (modified by yu)
+
+      !my state evolution law incorporating rsf+fh: dtheta/dt = g(v, theta)
+      !dth_dt = v * (theta_ssv - theta) / pb%dc
+      
+      dth_dt = v * (theta_ssv - theta) / pb%dc
 
   ! new friction law:
   !  case(xxx)

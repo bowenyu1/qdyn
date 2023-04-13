@@ -96,7 +96,8 @@ subroutine dtheta_dt(v,tau,sigma,theta,theta2,dth_dt,dth2_dt,pb)
   type(problem_type), intent(in) :: pb
   double precision, dimension(pb%mesh%nn), intent(in) :: v, tau, sigma
   double precision, dimension(pb%mesh%nn), intent(in) :: theta, theta2
-  double precision, dimension(pb%mesh%nn) :: dth_dt, dth2_dt, omega, theta_ssv, Vw, mu_ssv
+  double precision, dimension(pb%mesh%nn) :: dth_dt, dth2_dt, omega, theta_ssv
+  double precision, dimension(pb%mesh%nn) :: Vw, mu_ssv
 
   ! SEISMIC: If the CNS model is selected
   if (pb%i_rns_law == 3) then
@@ -106,10 +107,7 @@ subroutine dtheta_dt(v,tau,sigma,theta,theta2,dth_dt,dth2_dt,pb)
 
     omega = v * theta / pb%dc
     
-    !Parameters for flash heating model
-    Vw = pb%N_con * 3.14 * pb%a_th * ( pb%tp%rhoc * (pb%Tw - pb%T)/pb%tau_c ) ** 2
-    mu_ssv = ( pb%a * asinh( v/(2*pb%v_star) * exp((pb%mu_star + pb%b*log(pb%v_star/v))/pb%a) ) - pb%fw )/(1 + (v - Vw)) + pb%fw    
-    theta_ssv = exp( (pb%a * log(2*pb%v_star*sinh(mu_ssv/pb%a)/v)-pb%mu_star)/pb%b )
+    
 
     select case (pb%itheta_law)
 
@@ -129,6 +127,11 @@ subroutine dtheta_dt(v,tau,sigma,theta,theta2,dth_dt,dth2_dt,pb)
 
       !my state evolution law incorporating rsf+fh: dtheta/dt = g(v, theta)
       !dth_dt = v * (theta_ssv - theta) / pb%dc
+      
+      !Parameters for flash heating model
+      Vw = pb%N_con * 3.14 * pb%a_th * ( pb%tp%rhoc * (pb%Tw - pb%T)/pb%tau_c ) ** 2
+      mu_ssv = ( pb%a * asinh( v/(2*pb%v_star) * exp((pb%mu_star + pb%b*log(pb%v_star/v))/pb%a) ) - pb%fw )/(1 + (v - Vw)) + pb%fw    
+      theta_ssv = exp( (pb%a * log(2*pb%v_star*sinh(mu_ssv/pb%a)/v)-pb%mu_star)/pb%b )
       
       dth_dt = v * (theta_ssv - theta) / pb%dc
 

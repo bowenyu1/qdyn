@@ -168,7 +168,7 @@ subroutine allocate_mesh(pb)
   if (allocated(pb%mu_star)) then
     deallocate (  pb%tau, pb%sigma, pb%v, pb%theta, pb%theta2, pb%v_star, &
                   pb%ot%iot, pb%ot%iasp, pb%dc, pb%coh, pb%v_pl , pb%a, pb%b, &
-                  pb%v1, pb%v2, pb%mu_star, pb%dtau_dt, pb%slip, pb%theta_star )
+                  pb%v1, pb%v2, pb%mu_star, pb%dtau_dt, pb%slip, pb%theta_star, pb%N_con, pb%a_th, pb%Tw, pb%tau_c, pb%fw )
   endif
   allocate ( pb%tau(n), pb%sigma(n), pb%v(n), pb%theta(n), pb%theta2(n),  &
              pb%v_star(n), pb%ot%iot(n), pb%ot%iasp(n), &

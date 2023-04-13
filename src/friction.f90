@@ -175,6 +175,11 @@ subroutine dmu_dv_dtheta(dmu_dv,dmu_dtheta,v,theta,pb)
     write (6,*) "friction.f90::dmu_dv_dtheta is deprecated for the CNS model"
     stop
 
+  case(4) ! 2018 SCEC Benchmark
+    z = exp((pb%mu_star + pb%b * log(theta/pb%theta_star)) / pb%a) / (2*pb%v_star)
+    dmu_dv = pb%a / sqrt(1.0/z**2 + v**2)
+    dmu_dtheta = dmu_dv * (pb%b*v) / (pb%a*theta)
+
   case default
     write (6,*) "dmu_dv_dtheta: unkown friction law type"
     stop

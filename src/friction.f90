@@ -10,7 +10,7 @@ module friction
   !     dtheta/dt = g(v,theta)
   !   All friction properties can be spatially non-uniform
 
-  use problem_class, only : problem_type
+  use problem_class, only : problem_type, tp_type
 
   implicit none
   private
@@ -75,6 +75,7 @@ function friction_mu(v,theta,pb) result(mu)
     stop
 
   case (4) ! fh+rsf law (modified by yu)
+
     mu = pb%a*asinh( v/(2*pb%v_star)*exp( (pb%mu_star + pb%b*log(theta))/pb%a ) )
 
 ! new friction law:
@@ -97,18 +98,21 @@ subroutine dtheta_dt(v,tau,sigma,theta,theta2,dth_dt,dth2_dt,pb)
   double precision, dimension(pb%mesh%nn), intent(in) :: v, tau, sigma
   double precision, dimension(pb%mesh%nn), intent(in) :: theta, theta2
   double precision, dimension(pb%mesh%nn) :: dth_dt, dth2_dt, omega, theta_ssv
-  double precision, dimension(pb%mesh%nn) :: Vw, mu_ssv
+  double precision, dimension(pb%mesh%nn) :: Vw, mu_ssv, omega2
 
   ! SEISMIC: If the CNS model is selected
   if (pb%i_rns_law == 3) then
     call dphi_dt(v,tau,sigma,theta,theta2,dth_dt,dth2_dt,pb)
   ! SEISMIC: Else, the RSF model is selected (with various theta laws)
   else
+    
+    Vw = pb%N_con * 3.14 * pb%a_th * ( pb%tp%rhoc * (pb%Tw - pb%T )/pb%tau_c ) ** 2
+    mu_ssv = ( pb%a * asinh( v/(2*pb%v_star) * exp((pb%mu_star + pb%b*log(pb%v_star/v))/pb%a) ) - pb%fw )/(1 + (v - Vw)) + pb%fw    
+    theta_ssv = exp( (pb%a * log(2*pb%v_star*sinh(mu_ssv/pb%a)/v)-pb%mu_star)/pb%b )
+    omega2 = v * (theta_ssv - theta) / pb%dc
 
     omega = v * theta / pb%dc
     
-    
-
     select case (pb%itheta_law)
 
     case(0) ! "aging" in the no-healing approximation
@@ -125,15 +129,14 @@ subroutine dtheta_dt(v,tau,sigma,theta,theta2,dth_dt,dth2_dt,pb)
 
     case(4) ! rsf+fh law (modified by yu)
 
+      !Parameters for flash heating model
+      !Vw = pb%N_con * 3.14 * pb%a_th * ( pb%tp%rhoc * (pb%Tw - pb%T)/pb%tau_c ) ** 2
+      !mu_ssv = ( pb%a * asinh( v/(2*pb%v_star) * exp((pb%mu_star + pb%b*log(pb%v_star/v))/pb%a) ) - pb%fw )/(1 + (v - Vw)) + pb%fw    
+      !theta_ssv = exp( (pb%a * log(2*pb%v_star*sinh(mu_ssv/pb%a)/v)-pb%mu_star)/pb%b )
       !my state evolution law incorporating rsf+fh: dtheta/dt = g(v, theta)
       !dth_dt = v * (theta_ssv - theta) / pb%dc
-      
-      !Parameters for flash heating model
-      Vw = pb%N_con * 3.14 * pb%a_th * ( pb%tp%rhoc * (pb%Tw - pb%T)/pb%tau_c ) ** 2
-      mu_ssv = ( pb%a * asinh( v/(2*pb%v_star) * exp((pb%mu_star + pb%b*log(pb%v_star/v))/pb%a) ) - pb%fw )/(1 + (v - Vw)) + pb%fw    
-      theta_ssv = exp( (pb%a * log(2*pb%v_star*sinh(mu_ssv/pb%a)/v)-pb%mu_star)/pb%b )
-      
-      dth_dt = v * (theta_ssv - theta) / pb%dc
+      dth_dt = omega2
+
 
   ! new friction law:
   !  case(xxx)
@@ -175,7 +178,7 @@ subroutine dmu_dv_dtheta(dmu_dv,dmu_dtheta,v,theta,pb)
     write (6,*) "friction.f90::dmu_dv_dtheta is deprecated for the CNS model"
     stop
 
-  case(4) ! 2018 SCEC Benchmark
+  case(4) ! for filling the blank(need confirmation)
     z = exp((pb%mu_star + pb%b * log(theta/pb%theta_star)) / pb%a) / (2*pb%v_star)
     dmu_dv = pb%a / sqrt(1.0/z**2 + v**2)
     dmu_dtheta = dmu_dv * (pb%b*v) / (pb%a*theta)

@@ -23,6 +23,10 @@ contains
 subroutine set_theta_star(pb)
 
   type(problem_type), intent(inout) :: pb
+  !double precision, dimension(pb%mesh%nn) :: Vw0
+
+  !Vw0 = pb%N_con*3.14*pb%a_th*((pb%Tw)/pb%tau_c)**2/10e-6
+  !write (6,*) "check1"
 
   select case (pb%i_rns_law)
 
@@ -39,6 +43,9 @@ subroutine set_theta_star(pb)
     pb%theta_star = 1
 
   case (4) ! rsf+fh law (modified by yu)
+    !Vw0 = pb%N_con * 3.14 * pb%a_th * (pb%tp%rhoc * (pb%Tw - pb%tp%T_a)/pb%tau_c)**2 / pb%Da 
+    !pb%theta_star = exp((log(sinh(((pb%mu_star - pb%fw)/(1 + pb%v_star/Vw0)&
+    !+ pb%fw)/pb%a)*2)*pb%a - pb%mu_star)/pb%b)
     pb%theta_star = pb%dc/pb%v_star
 
 ! new friction law:
@@ -106,11 +113,13 @@ subroutine dtheta_dt(v,tau,sigma,theta,theta2,dth_dt,dth2_dt,pb)
   ! SEISMIC: Else, the RSF model is selected (with various theta laws)
   else
     
-    Vw = pb%N_con * 3.14 * pb%a_th * ( pb%tp%rhoc * (pb%Tw - pb%T )/pb%tau_c ) ** 2
-    mu_ssv = ( pb%a * asinh( v/(2*pb%v_star) * exp((pb%mu_star + pb%b*log(pb%v_star/v))/pb%a) ) - pb%fw )/(1 + (v - Vw)) + pb%fw    
-    theta_ssv = exp( (pb%a * log(2*pb%v_star*sinh(mu_ssv/pb%a)/v)-pb%mu_star)/pb%b )
-    omega2 = v * (theta_ssv - theta) / pb%dc
-
+    if(pb%features%tp == 1) then
+      Vw = pb%N_con * 3.14 * pb%a_th * ( pb%tp%rhoc * (pb%Tw - pb%T )/pb%tau_c ) ** 2
+      mu_ssv = ( pb%a * asinh( v/(2*pb%v_star) * exp((pb%mu_star + pb%b*log(pb%v_star/v))/pb%a) ) - pb%fw )/(1 + (v - Vw)) + pb%fw    
+      theta_ssv = exp( (pb%a * log(2*pb%v_star*sinh(mu_ssv/pb%a)/v)-pb%mu_star)/pb%b )
+      omega2 = v * (theta_ssv - theta) / pb%dc
+    endif
+    
     omega = v * theta / pb%dc
     
     select case (pb%itheta_law)
@@ -130,7 +139,7 @@ subroutine dtheta_dt(v,tau,sigma,theta,theta2,dth_dt,dth2_dt,pb)
     case(4) ! rsf+fh law (modified by yu)
 
       !Parameters for flash heating model
-      !Vw = pb%N_con * 3.14 * pb%a_th * ( pb%tp%rhoc * (pb%Tw - pb%T)/pb%tau_c ) ** 2
+      !Vw = pb%N_con * 3.14 * pb%a_th * ( pb%tp%rhoc * (pb%Tw - pb%T )/pb%tau_c ) ** 2 / pb%Da
       !mu_ssv = ( pb%a * asinh( v/(2*pb%v_star) * exp((pb%mu_star + pb%b*log(pb%v_star/v))/pb%a) ) - pb%fw )/(1 + (v - Vw)) + pb%fw    
       !theta_ssv = exp( (pb%a * log(2*pb%v_star*sinh(mu_ssv/pb%a)/v)-pb%mu_star)/pb%b )
       !my state evolution law incorporating rsf+fh: dtheta/dt = g(v, theta)

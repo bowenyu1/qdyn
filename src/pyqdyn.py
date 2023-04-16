@@ -114,8 +114,9 @@ class qdyn:
             "N_CON": 30,                        # Number of contacts
             "A_TH" : 2.8e-6,                    # Thermal diffusivity
             "TW": 600,                          # Weakening Temperature [K]
-            "TAU_C": 5.2e8,                     # Shear strength of contacts
-            "FW": 0.1                           # Friction coefficient at weakening state
+            "TAU_C": 5.2e8,                     # Shear strength of contacts [Pa]
+            "FW": 0.1,                           # Friction coefficient at weakening state
+            "DA": 10e-6                         # asperity size [m]                          
         }
 
         # CNS microphysical model parameters
@@ -250,7 +251,7 @@ class qdyn:
             exit()
 
         mesh_params_general = ("IOT", "IASP", "V_PL", "SIGMA")
-        mesh_params_RSF = ("V_0", "TH_0", "A", "B", "DC", "V1", "V2", "MU_SS", "V_SS", "CO", "N_CON", "A_TH", "TW", "TAU_C", "FW")
+        mesh_params_RSF = ("V_0", "TH_0", "A", "B", "DC", "V1", "V2", "MU_SS", "V_SS", "CO", "N_CON", "A_TH", "TW", "TAU_C", "FW", "DA")
         mesh_params_CNS = ("TAU", "PHI_INI", "A_TILDE", "MU_TILDE_STAR", "Y_GR_STAR", "H", "PHI_C", "PHI0", "THICKNESS")
         mesh_params_creep = ("A", "N", "M")
         mesh_params_localisation = ("LOCALISATION", "PHI_INI_BULK")
@@ -428,7 +429,7 @@ class qdyn:
                     input_str += "%.15g %.15g %.15g\n" % (mesh["THICKNESS"][iloc[i]], mesh["IOT"][iloc[i]], mesh["IASP"][iloc[i]])
             else: # RSF model
                 for i in range(nloc):
-                    input_str += "%.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g\n" % (mesh["SIGMA"][iloc[i]], mesh["V_0"][iloc[i]], mesh["TH_0"][iloc[i]], mesh["A"][iloc[i]], mesh["B"][iloc[i]], mesh["DC"][iloc[i]], mesh["V1"][iloc[i]], mesh["V2"][iloc[i]], mesh["MU_SS"][iloc[i]], mesh["V_SS"][iloc[i]], mesh["IOT"][iloc[i]], mesh["IASP"][iloc[i]], mesh["CO"][iloc[i]], mesh["V_PL"][iloc[i]], mesh["N_CON"][iloc[i]],  mesh["A_TH"][iloc[i]], mesh["TW"][iloc[i]], mesh["TAU_C"][iloc[i]], mesh["FW"][iloc[i]])
+                    input_str += "%.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g %.15g\n" % (mesh["SIGMA"][iloc[i]], mesh["V_0"][iloc[i]], mesh["TH_0"][iloc[i]], mesh["A"][iloc[i]], mesh["B"][iloc[i]], mesh["DC"][iloc[i]], mesh["V1"][iloc[i]], mesh["V2"][iloc[i]], mesh["MU_SS"][iloc[i]], mesh["V_SS"][iloc[i]], mesh["IOT"][iloc[i]], mesh["IASP"][iloc[i]], mesh["CO"][iloc[i]], mesh["V_PL"][iloc[i]], mesh["N_CON"][iloc[i]],  mesh["A_TH"][iloc[i]], mesh["TW"][iloc[i]], mesh["TAU_C"][iloc[i]], mesh["FW"][iloc[i]], mesh["DA"][iloc[i]])
 
             # Check if localisation is requested
             if settings["FEAT_LOCALISATION"] == 1:

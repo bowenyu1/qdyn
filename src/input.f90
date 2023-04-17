@@ -150,13 +150,14 @@ subroutine read_main(pb)
   ! Else, the RSF model is selected
   else
     allocate ( pb%a(n), pb%b(n), pb%v1(n), &
-               pb%v2(n), pb%mu_star(n), pb%N_con(n), pb%a_th(n), pb%Tw(n), pb%tau_c(n), pb%fw(n))
+               pb%v2(n), pb%mu_star(n), pb%N_con(n), pb%a_th(n), pb%Tw(n), pb%tau_c(n), pb%fw(n), pb%Da(n))
     do i=1,n
       read(FID_IN, *) pb%sigma(i), pb%v(i), pb%theta(i),  &
                       pb%a(i), pb%b(i), pb%dc(i), pb%v1(i), &
                       pb%v2(i), pb%mu_star(i), pb%v_star(i), &
                       pb%ot%iot(i), pb%ot%iasp(i), pb%coh(i), pb%v_pl(i), &
-                      pb%N_con(i), pb%a_th(i), pb%Tw(i), pb%tau_c(i), pb%fw(i)
+                      pb%N_con(i), pb%a_th(i), pb%Tw(i), pb%tau_c(i), pb%fw(i), &
+                      pb%Da(i)
     end do
   endif
 

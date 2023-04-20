@@ -111,12 +111,12 @@ class qdyn:
             "CO": 0,							# Cohesion [Pa]
             "V_0": 1.01e-5,						# Initial slip velocity [m/s]
             "TH_0": 1.0,						# Initial state [s]
-            "N_CON": 30,                        # Number of contacts
-            "A_TH" : 2.8e-6,                    # Thermal diffusivity
-            "TW": 600,                          # Weakening Temperature [K]
-            "TAU_C": 5.2e8,                     # Shear strength of contacts [Pa]
-            "FW": 0.1,                           # Friction coefficient at weakening state
-            "DA": 10e-6                         # asperity size [m]                          
+            "N_CON": 30,                       # Number of contacts
+            "A_TH" : 2.8e-6,                   # Thermal diffusivity [m2/s], could be calculated from "K_T/(RHOC)"
+            "TW": 600,                         # Weakening Temperature [K]
+            "TAU_C": 5.2e8,                    # Shear strength of contacts [Pa]
+            "FW": 0.1,                         # Friction coefficient at weakening state
+            "DA": 10e-6                        # asperity size [m]                          
         }
 
         # CNS microphysical model parameters

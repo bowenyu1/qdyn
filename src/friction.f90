@@ -114,7 +114,7 @@ subroutine dtheta_dt(v,tau,sigma,theta,theta2,dth_dt,dth2_dt,pb)
   else
     
     if(pb%features%tp == 1) then
-      Vw = pb%N_con * 3.14 * pb%a_th * ( pb%tp%rhoc * (pb%Tw - pb%T )/pb%tau_c ) ** 2
+      Vw = (pb%N_con * 3.14 * pb%a_th * ( pb%tp%rhoc * (pb%Tw - pb%T )/pb%tau_c ) ** 2)/pb%Da
       mu_ssv = ( pb%a * asinh( v/(2*pb%v_star) * exp((pb%mu_star + pb%b*log(pb%v_star/v))/pb%a) ) - pb%fw )/(1 + (v/Vw)) + pb%fw    
       theta_ssv = exp( (pb%a * log(2*pb%v_star*sinh(mu_ssv/pb%a)/v)-pb%mu_star)/pb%b )
       omega2 = v * (theta_ssv - theta) / pb%dc

@@ -186,11 +186,19 @@ subroutine update_field(pb)
 
   double precision, dimension(pb%mesh%nn) :: P
   integer :: ivmax
+  integer :: i
 
   ! SEISMIC: obtain P at the previous time step
   P = 0d0
   if (pb%features%tp == 1) P = pb%P
-
+  
+  if (pb%features%tp == 1) then
+    do i=1,pb%mesh%nn
+      if(pb%sigma(i) < 1e6) then
+        pb%sigma(i) = 1e6
+      endif
+    enddo
+  endif
   ! SEISMIC: in case of the CNS model, re-compute the slip velocity with
   ! the final value of tau, sigma, and porosity. Otherwise, use the standard
   ! rate-and-state expression to calculate tau as a function of velocity
